@@ -1,0 +1,14 @@
+onnx>=1.14.0
+onnxruntime>=1.15.0
+
+# --- Sensor Fusion & EKF (Hardware Layer) ---
+filterpy>=1.4.5
+
+# --- Dashboard & Visualization (UI) ---
+streamlit>=1.25.0
+fastapi>=0.100.0
+uvicorn>=0.22.0
+
+# --- Testing & Benchmarking ---
+pytest>=7.4.0
+tqdm>=4.65.0
