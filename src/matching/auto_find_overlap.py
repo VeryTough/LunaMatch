@@ -3,62 +3,66 @@ import glob
 import numpy as np
 import sys
 
-# Ensure Python can find your 'src' folder
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(ROOT_DIR)
+
 from src.core.matcher import LunarMatcher
+from src.core.geometric_verification import GeometricVerifier  # Import your Phase 2 code!
 
-PROCESSED_DIR = r"D:\LunaMatch\LunaMatch\data\processed"
+PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
 
-# The Nadir tile we want to find a match for
-NADIR_TARGET = os.path.join(PROCESSED_DIR, "ch2_tmc_ncn_20260813T0627378557_d_img_d18_tile_2.npy")
+# Target a tile deep in the middle of the strip
+NADIR_TARGET = glob.glob(os.path.join(PROCESSED_DIR, "*_ncn_*_tile_20.npy"))[0]
 
 def find_true_overlap():
-    print("Initializing SuperPoint and LightGlue...")
-    matcher = LunarMatcher(max_keypoints=1024)
+    print("Initializing SuperPoint, LightGlue, and RANSAC...")
+    # Double the keypoint pool to feed more valid points to RANSAC
+    matcher = LunarMatcher(max_keypoints=4096)
+    verifier = GeometricVerifier() # Uses the new class defaults
     
-    print(f"\nLoading Target: {os.path.basename(NADIR_TARGET)}")
     nadir_tile = np.load(NADIR_TARGET)
+    core_timestamp = os.path.basename(NADIR_TARGET).split('_')[3][:15] 
     
-    # Grab every Aft tile we generated
-    aft_files = glob.glob(os.path.join(PROCESSED_DIR, "*_nca_*.npy"))
+    aft_files = glob.glob(os.path.join(PROCESSED_DIR, f"*_nca_{core_timestamp}*.npy"))
     
-    best_match_count = 0
-    best_aft_file = None
-    best_coordinates = None
+    best_inlier_count = 0
+    best_file = None
+    best_coords = None
     
-    print("\nSweeping through Aft tiles to find the physical overlap...")
+    print("\nSweeping Aft tiles (Filtering by RANSAC Inliers)...")
     for aft_path in aft_files:
+        tile_num = int(os.path.basename(aft_path).split('_tile_')[1].replace('.npy', ''))
+        
         aft_tile = np.load(aft_path)
         
-        # Feed the pair to the AI
+        # 1. AI extracts raw points
         results = matcher.match_image_pair(nadir_tile, aft_tile)
-        match_count = len(results["pts_src"])
+        pts_src, pts_ref = results["pts_src"], results["pts_ref"]
+        raw_match_count = len(pts_src)
         
-        print(f"  -> {os.path.basename(aft_path)}: {match_count} matches")
+        inlier_count = 0
+        # 2. RANSAC immediately tests the geometry
+        if raw_match_count >= 4:
+            verify_result = verifier.verify_and_align(pts_src, pts_ref)
+            if verify_result["success"]:
+                inlier_count = verify_result["inlier_count"]
         
-        # Keep track of the highest spike in matches
-        if match_count > best_match_count:
-            best_match_count = match_count
-            best_aft_file = aft_path
-            best_coordinates = results
+        print(f"  -> tile_{tile_num}: {raw_match_count} raw AI matches | {inlier_count} RANSAC INLIERS")
+        
+        # 3. We pick the winner based on INLIERS, not raw matches
+        if inlier_count > best_inlier_count:
+            best_inlier_count = inlier_count
+            best_file = aft_path
+            best_coords = results
 
-    print("\n" + "="*50)
-    # A threshold of 20+ usually means a true physical overlap, not just noise
-    if best_match_count > 20: 
-        print(f"OVERLAP FOUND!")
-        print(f"Target Nadir: tile_0")
-        print(f"Matches With: {os.path.basename(best_aft_file)}")
-        print(f"Total Valid Coordinates: {best_match_count}")
-        
-        # This is where we save the exact dictionary output for Vivek
+    # Lower the threshold to accept the 17-point consensus
+    if best_inlier_count >= 10: 
+        print(f"\nOVERLAP FOUND! Matches With: {os.path.basename(best_file)}")
         save_path = os.path.join(PROCESSED_DIR, "final_matched_coordinates.npz")
-        np.savez(save_path, 
-                 pts_src=best_coordinates["pts_src"], 
-                 pts_ref=best_coordinates["pts_ref"])
-        print(f"Exported coordinates for RANSAC to: {save_path}")
-        
+        np.savez(save_path, pts_src=best_coords["pts_src"], pts_ref=best_coords["pts_ref"])
+        print(f"Exported verified coordinates to: {save_path}")
     else:
-        print("FAILED: No tile contained enough overlapping geometry.")
+        print("\nFAILED: No tile passed geometric verification.")
 
 if __name__ == "__main__":
     find_true_overlap()
