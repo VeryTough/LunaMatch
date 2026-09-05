@@ -1,21 +1,101 @@
-# LunaMatch: Chandrayaan-2 Orbital Image Registration
+# LunaMatch
 
-LunaMatch is a high-precision computer vision pipeline designed to accurately register Chandrayaan-2 Terrain Mapping Camera (TMC) imagery. It specifically matches Nadir (0°) and Aft (-25°) viewing angles by accounting for 3D lunar parallax.
+**High-precision computer vision pipeline for Chandrayaan-2 orbital image registration**
 
-## The Challenge
-Matching orbital imagery of the Moon is difficult due to significant 3D parallax. Craters exhibit elevation relief, meaning a standard 2D Homography matrix fails to accurately warp the images. 
+[![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
+[![OpenCV](https://img.shields.io/badge/OpenCV-USAC__MAGSAC-green.svg)](https://opencv.org/)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 
-## Our Approach
-1. **Feature Extraction:** Utilizes PyTorch-accelerated SuperPoint and LightGlue to extract and match thousands of deep-learned keypoints across image tiles.
-2. **Epipolar Geometry:** Replaces standard flat-plane RANSAC with a 3D-aware Fundamental Matrix verifier to mathematically account for crater depth and camera tilt.
-3. **Adaptive Tiling:** Processes the massive orbital strips in localized chunks to guarantee sub-pixel alignment.
+LunaMatch registers Chandrayaan-2 Terrain Mapping Camera (TMC) imagery across viewing geometries — matching **Nadir (0°)** and **Aft (−25°)** angles by explicitly modeling 3D lunar parallax, rather than assuming a flat surface.
 
-## Final Hackathon Metrics (Phase 2 Verification)
-* **Inlier Ratio:** 73.53% (Target: >65%)
-* **Registration RMSE:** 0.6243 pixels (Target: <0.8 pixels)
-* **Geometric Consensus:** Verified 3D stereoscopic lock using OpenCV `USAC_MAGSAC`.
+---
+
+## Table of Contents
+
+- [The Problem](#the-problem)
+- [Approach](#approach)
+- [Results](#results)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Roadmap](#roadmap)
+- [Team](#team)
+
+---
+
+## The Problem
+
+Registering orbital imagery of the Moon is hard because the surface is **not planar**. Craters and ridges introduce real elevation relief, so a standard 2D homography — which assumes all matched points lie on a single plane — systematically fails to warp one image onto another when viewing angles differ.
+
+This breaks naive feature-matching pipelines whenever the Nadir and Aft passes need to be fused, since the same crater projects to different pixel offsets depending on its depth, not just its planar position.
+
+## Approach
+
+LunaMatch replaces the flat-plane assumption with a full epipolar-geometry pipeline:
+
+| Stage | What it does |
+|---|---|
+| **1. Feature extraction** | PyTorch-accelerated **SuperPoint** + **LightGlue** extract and match thousands of deep-learned keypoints across tiled image chunks |
+| **2. Epipolar geometry** | A 3D-aware **Fundamental Matrix** verifier (OpenCV `USAC_MAGSAC`) replaces flat-plane RANSAC, correctly accounting for crater depth and camera tilt |
+| **3. Adaptive tiling** | Large orbital strips are processed in localized tiles to preserve sub-pixel alignment accuracy |
+
+This gives geometrically consistent matches even where relief and viewing-angle disparity would defeat a 2D-homography-based approach.
+
+## Results
+
+Phase 2 verification metrics on the current pipeline:
+
+| Metric | Result | Target |
+|---|---|---|
+| Inlier ratio | **73.53%** | > 65% |
+| Registration RMSE | **0.6243 px** | < 0.8 px |
+| Geometric consensus | Verified 3D stereoscopic lock (`USAC_MAGSAC`) | — |
 
 ## Quick Start
-1. Install dependencies: `pip install -r requirements.txt`
-2. Run the tile sweeper: `python src/matching/auto_find_overlap.py`
-3. Verify metrics: `python tests/test_ransac.py`
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Find overlapping tiles between Nadir/Aft strips
+python src/matching/auto_find_overlap.py
+
+# 3. Verify registration metrics
+python tests/test_ransac.py
+```
+
+## Project Structure
+
+```
+lunamatch/
+├── src/
+│   └── matching/
+│       └── auto_find_overlap.py   # tile-overlap discovery
+├── tests/
+│   └── test_ransac.py             # RANSAC / MAGSAC verification
+├── requirements.txt
+└── README.md
+```
+
+## Roadmap
+
+- [x] Nadir–Aft registration prototype (SuperPoint + LightGlue + MAGSAC)
+- [x] Phase 2 metric verification (inlier ratio, RMSE)
+- [ ] Hardware-in-the-loop rover localization validation
+- [ ] Extended SIH prototype with sensor fusion on physical rover
+
+## Team
+
+Built for **Smart India Hackathon 2026** — problem statement **SIH26166 (ISRO)**.
+
+- Anuraag Chakraborty
+- Vivek Singh Mathur
+- Mayank Nitin Sarode
+- Priyanshu Bhati
+- Prantar Pallab Mazumdar
+- Ananya Bisht
+
+**Mentor:** Dr. Avinash Chandra
+
+---
+
+*Part of the LunaMatch project addressing illumination-robust lunar image correspondence and rover localization.*
