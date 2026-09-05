@@ -3,7 +3,9 @@ __pycache__/
 .venv/
 venv/
 .env
+env/
 
+data/
 data/raw/*
 data/processed/*
 data/synthetic/*
@@ -23,3 +25,5 @@ models/weights/*
 *.zip
 *.png
 *.jpg
+
+LitReview/

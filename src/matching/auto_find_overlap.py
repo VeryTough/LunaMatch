@@ -12,7 +12,7 @@ from src.core.geometric_verification import GeometricVerifier  # Import your Pha
 PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
 
 # Target a tile deep in the middle of the strip
-NADIR_TARGET = glob.glob(os.path.join(PROCESSED_DIR, "*_ncn_*_tile_20.npy"))[0]
+NADIR_TARGET = glob.glob(os.path.join(PROCESSED_DIR, "*_ncn_*_tile_10.npy"))[0]
 
 def find_true_overlap():
     print("Initializing SuperPoint, LightGlue, and RANSAC...")
