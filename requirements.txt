@@ -1,0 +1,31 @@
+# --- Core Math & Image Processing ---
+numpy>=1.24.0
+scipy>=1.10.0
+opencv-python>=4.8.0
+scikit-image>=0.21.0
+scikit-learn>=1.3.0
+tifffile>=2023.7.10
+imageio>=2.31.0
+pvl>=1.3.1
+pyyaml>=6.0.1
+matplotlib>=3.7.0
+
+# --- Deep Learning & Learned Descriptors (P1) ---
+
+torch>=2.0.0
+torchvision>=0.15.0
+kornia>=0.7.0
+onnx>=1.14.0
+onnxruntime>=1.15.0
+
+# --- Sensor Fusion & EKF (Hardware Layer) ---
+filterpy>=1.4.5
+
+# --- Dashboard & Visualization (UI) ---
+streamlit>=1.25.0
+fastapi>=0.100.0
+uvicorn>=0.22.0
+
+# --- Testing & Benchmarking ---
+pytest>=7.4.0
+tqdm>=4.65.0

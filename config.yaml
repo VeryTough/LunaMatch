@@ -1,0 +1,25 @@
+sensors:
+  tmc2:
+    identifiers: ["_ncn_", "_nca_"]
+    loader: "pds4"
+    crop_size: 1024
+    clip_percentiles: [1, 99]
+    clahe:
+      clip_limit: 2.0
+      grid_size: [8, 8]
+    bilateral_filter:
+      enabled: true
+      d: 3
+      sigma_color: 15
+      sigma_space: 15
+
+  lroc_nac:
+    identifiers: ["M", "m"] # LROC files typically start with 'M' (e.g., M1108313364LE)
+    loader: "tiff"
+    crop_size: 4096
+    clip_percentiles: [1, 99]
+    clahe:
+      clip_limit: 2.0
+      grid_size: [16, 16]
+    bilateral_filter:
+      enabled: false
