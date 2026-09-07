@@ -8,7 +8,11 @@ from matplotlib.widgets import CheckButtons
 
 # --- BULLETPROOF DYNAMIC PATHS ---
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+<<<<<<< HEAD
 PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed2")
+=======
+PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
+>>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
 
 def find_one(pattern):
     matches = glob.glob(pattern)
@@ -16,9 +20,15 @@ def find_one(pattern):
         raise FileNotFoundError(f"No file found matching: {pattern}")
     return matches[0]
 
+<<<<<<< HEAD
 NADIR_IMG_PATH = find_one(os.path.join(PROCESSED_DIR, "ch2_tmc_ncn_20260813T0627378557_d_img_d18","ch2_tmc_ncn_20260813T0627378557_d_img_d18_tile_241.npy"))
 AFT_IMG_PATH = find_one(os.path.join(PROCESSED_DIR, "ch2_tmc_nca_20260813T0627378526_d_img_d18", "ch2_tmc_nca_20260813T0627378526_d_img_d18_tile_211.npy"))
 COORDS_PATH = os.path.join(PROCESSED_DIR, "ch2_tmc_ncn_20260813T0627378557_d_img_d18", "final_matched_coordinates.npz")
+=======
+NADIR_IMG_PATH = find_one(os.path.join(PROCESSED_DIR, "*_ncn_*_tile_10.npy"))
+AFT_IMG_PATH = find_one(os.path.join(PROCESSED_DIR, "*_nca_*_tile_24.npy"))
+COORDS_PATH = os.path.join(PROCESSED_DIR, "final_matched_coordinates.npz")
+>>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
 
 OUTPUT_PATH = "LunaMatch_Interactive_MatchMap.png"
 EPIPOLAR_THRESH = 1.0  

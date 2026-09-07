@@ -43,6 +43,9 @@ class GeometricVerifier:
             "inlier_count": true_inlier_count,
             "inlier_ratio": true_inlier_count / optimized_total_pool,
             "rmse": rmse,
+<<<<<<< HEAD
             "inliers": mask,
+=======
+>>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
             "total_evaluated": optimized_total_pool 
         }
