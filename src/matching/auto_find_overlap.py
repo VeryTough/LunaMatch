@@ -58,7 +58,7 @@ def find_true_overlap():
         inlier_count = 0
         rmse_val = 0
         # 2. RANSAC immediately tests the geometry
-        if raw_match_count >= 50:
+        if raw_match_count >= 100:
             verify_result = verifier.verify_and_align(pts_src, pts_ref)
             if verify_result["success"]:
                 inlier_count = verify_result["inlier_count"]
@@ -72,7 +72,7 @@ def find_true_overlap():
             best_file = aft_path
             best_coords = results
 
-    if best_inlier_count >= 30: 
+    if best_inlier_count >= 75: 
         print(f"\nOVERLAP FOUND! Matches With: {os.path.basename(best_file)}")
         # Save results in the Nadir directory for easy reference
         save_path = os.path.join(NADIR_DIR, "final_matched_coordinates.npz")
