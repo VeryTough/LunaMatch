@@ -2,33 +2,22 @@ import os
 import glob
 import cv2
 import numpy as np
-<<<<<<< HEAD
-from src.core.preprocessing import load_chandrayaan_pds4, LunarPreprocessor
+from src.core.preprocessing import load_chandrayaan_pds4, LunarPreprocessor, PreprocessRouter
 import sys
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR)
 
 RAW_DIR = os.path.join(ROOT_DIR, "data", "raw")
-PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed2")
-=======
-from src.core.preprocessing import load_chandrayaan_pds4
-
-RAW_DIR = r"D:\LunaMatch\LunaMatch\data\raw\chandrayaan2_samples" 
-PROCESSED_DIR = r"D:\LunaMatch\LunaMatch\data\processed"
->>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
+PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
 
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 def batch_process():
-<<<<<<< HEAD
-    # Initialize the preprocessor to access CLAHE
-    preprocessor = LunarPreprocessor()
+    # 1. Initialize the YAML config router instead of the preprocessor
+    router = PreprocessRouter(os.path.join(ROOT_DIR, "config.yaml"))
     
     # Process BOTH Nadir and Aft in one run
-=======
-    # Let's process BOTH Nadir and Aft in one run so we have all tiles
->>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
     all_files = glob.glob(os.path.join(RAW_DIR, "*_ncn_*.xml")) + \
                 glob.glob(os.path.join(RAW_DIR, "*_nca_*.xml"))
     
@@ -37,7 +26,28 @@ def batch_process():
         return
 
     for xml_path in all_files:
-<<<<<<< HEAD
+        base_name = os.path.basename(xml_path).replace('.xml', '')
+        print(f"Processing: {base_name}")
+        
+        # 2. Get the specific profile for this file (TMC-2)
+        try:
+            profile = router.get_profile(base_name)
+        except ValueError as e:
+            print(f"Skipping {base_name}: {e}")
+            continue
+            
+        # 3. NOW instantiate the preprocessor with the correct profile
+        preprocessor = LunarPreprocessor(profile)
+    
+    # Process BOTH Nadir and Aft in one run
+    all_files = glob.glob(os.path.join(RAW_DIR, "*_ncn_*.xml")) + \
+                glob.glob(os.path.join(RAW_DIR, "*_nca_*.xml"))
+    
+    if not all_files:
+        print(f"No XML files found in {RAW_DIR}. Check your path!")
+        return
+
+    for xml_path in all_files:
         base_name = os.path.basename(xml_path).replace('.xml', '')
         print(f"Processing: {base_name}")
         
@@ -46,7 +56,7 @@ def batch_process():
         os.makedirs(xml_output_dir, exist_ok=True)
         
         # 1. Load PDS4 data into an 8-bit numpy array
-        img_array = load_chandrayaan_pds4(xml_path)
+        img_array = load_chandrayaan_pds4(xml_path, profile)
         
         # 2. Crop logic
         crop_size = 1024
@@ -71,31 +81,6 @@ def batch_process():
             cv2.imwrite(png_path, enhanced_tile)
             
         print(f"  -> Generated and enhanced {len(tiles)} tiles in {xml_output_dir}")
-=======
-        print(f"Processing: {os.path.basename(xml_path)}")
-        img_array = load_chandrayaan_pds4(xml_path)
-        
-        h, w = img_array.shape
-        tile_height = 1024
-        
-        # FIX: Slice through the ENTIRE height of the image, stepping every 4000 pixels
-        tile_id = 0
-        for start_y in range(0, h - tile_height, 4000):
-            end_y = start_y + tile_height
-            
-            tile = img_array[start_y:end_y, 0:w]
-            base_name = os.path.basename(xml_path).replace('.xml', '')
-            
-            npy_path = os.path.join(PROCESSED_DIR, f"{base_name}_tile_{tile_id}.npy")
-            png_path = os.path.join(PROCESSED_DIR, f"{base_name}_tile_{tile_id}.png")
-            
-            np.save(npy_path, tile)
-            cv2.imwrite(png_path, tile)
-            
-            tile_id += 1
-            
-        print(f"  -> Generated {tile_id} tiles across the entire strip.")
->>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
 
 if __name__ == "__main__":
     batch_process()
