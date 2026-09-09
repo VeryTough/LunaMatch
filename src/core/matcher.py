@@ -10,13 +10,6 @@ class LunarMatcher:
         # Dropping thresholds to practically zero to flood the pipeline with raw matches
         self.extractor = SuperPoint(max_num_keypoints=max_keypoints, detection_threshold=0.015).eval().to(self.device)
         self.matcher = LightGlue(features='superpoint', depth_confidence=-1, width_confidence=-1, filter_threshold=0.1).eval().to(self.device)
-        
-    def __init__(self, max_keypoints=4096):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # Dropping thresholds to practically zero to flood the pipeline with raw matches
-        self.extractor = SuperPoint(max_num_keypoints=max_keypoints, detection_threshold=0.0001).eval().to(self.device)
-        self.matcher = LightGlue(features='superpoint', filter_threshold=0.001).eval().to(self.device)
-
 
     def _apply_clahe(self, img_np: np.ndarray) -> np.ndarray:
         if len(img_np.shape) == 3: img_np = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
