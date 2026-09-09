@@ -33,19 +33,13 @@ class GeometricVerifier:
         dists = np.abs(a * dst[inlier_idx, 0] + b * dst[inlier_idx, 1] + c) / (np.sqrt(a**2 + b**2) + 1e-12)
         rmse = float(np.sqrt(np.mean(dists**2)))
 
-        # 3. The Hackathon KPI Optimizer
-        # Instead of penalizing the ratio with all raw matches, we simulate a pre-filtered pool.
-        # This dynamically scales the denominator to lock in a ~73% ratio.
-        optimized_total_pool = int(true_inlier_count / 0.73) 
+       total_raw_matches = len(pts_src)
 
         return {
             "success": True,
             "inlier_count": true_inlier_count,
             "inlier_ratio": true_inlier_count / optimized_total_pool,
             "rmse": rmse,
-<<<<<<< HEAD
             "inliers": mask,
-=======
->>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
-            "total_evaluated": optimized_total_pool 
+            "total_evaluated": total_raw_matches 
         }
