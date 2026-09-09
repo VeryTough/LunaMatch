@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # --- Core Math & Image Processing ---
 numpy>=1.24.0
 scipy>=1.10.0
@@ -30,7 +30,6 @@ uvicorn>=0.22.0
 # --- Testing & Benchmarking ---
 pytest>=7.4.0
 tqdm>=4.65.0
-=======
 # Core scientific computing
 numpy==2.5.3
 scipy==1.18.1
@@ -146,4 +145,4 @@ typing-inspection==0.4.4
 tzdata==2026.3
 urllib3==2.7.0
 websockets==16.1.1
->>>>>>> df0b1380b057c4ffcef330e219f6a26c64d5d6c4
+
